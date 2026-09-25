@@ -1,0 +1,21 @@
+{
+  "name": "assistenteMaquiagem",
+  "model": {
+    "provider": "bedrock",
+    "modelId": "amazon.nova-lite-v1:0"
+  },
+  "tools": [
+    {
+      "type": "agentcore_code_interpreter",
+      "name": "code-interpreter"
+    }
+  ],
+  "skills": [
+    {
+      "s3Uri": "s3://assistente-maquiagem-650830975368-2026/catalogo/"
+    }
+  ],
+  "memory": {
+    "mode": "managed"
+  }
+}

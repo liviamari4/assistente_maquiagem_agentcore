@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
+  "name": "assistenteMaquiagem",
+  "version": 1,
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "assistenteMaquiagem"
+  },
+  "runtimes": [],
+  "memories": [],
+  "knowledgeBases": [],
+  "credentials": [],
+  "evaluators": [
+    {
+      "name": "conformidade_beauty",
+      "level": "TRACE",
+      "config": {
+        "llmAsAJudge": {
+         "model": "us.amazon.nova-pro-v1:0",
+          "instructions": "Avalie a conformidade da resposta. Contexto: {context}. Resposta do agente: {assistant_turn}",
+          "ratingScale": {
+            "categorical": [
+              {
+                "label": "Pass",
+                "definition": "Meets the evaluation criteria"
+              },
+              {
+                "label": "Fail",
+                "definition": "Does not meet the evaluation criteria"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": [],
+  "configBundles": [],
+  "abTests": [],
+  "harnesses": [
+    {
+      "name": "assistenteMaquiagem",
+      "path": "app/assistenteMaquiagem"
+    }
+  ],
+  "datasets": [],
+  "capacityProviders": [],
+  "payments": []
+}

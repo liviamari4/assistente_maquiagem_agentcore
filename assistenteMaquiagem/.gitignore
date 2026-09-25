@@ -1,0 +1,40 @@
+# Ambientes virtuais
+.venv/
+.venv-deepeval/
+
+# Caches
+.deepeval/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Variáveis de ambiente e credenciais
+.env
+.env.*
+!.env.example
+
+# Resultados brutos de avaliações
+eval_*.json
+
+# Arquivos temporários de testes
+gemma-id1.txt
+id21-run3.txt
+loop-multiturno.txt
+mensagem.json
+saida.txt
+teste2.txt
+tool-test.json
+
+# Arquivos gerados pelo AgentCore
+agentcore/.cli/deployed-state.json
+agentcore/.llm-context/
+agentcore/cdk/cdk.out/
+agentcore/cdk/dist/
+agentcore/cdk/node_modules/
+
+# Arquivos de backup temporário
+*.bak
+
+# Configurações locais da AWS
+agentcore/aws-targets.json
+indexing-rule.json
