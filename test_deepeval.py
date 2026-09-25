@@ -115,7 +115,6 @@ def test_caso(caso):
         # Envia a pergunta para o agente real do AgentCore.
         resposta = perguntar_agentcore(pergunta)
 
-    # Cria o caso que será avaliado pelo DeepEval.
     teste = LLMTestCase(
         input=pergunta,
         actual_output=resposta,
@@ -123,17 +122,14 @@ def test_caso(caso):
         retrieval_context=caso.get("reference_context") or []
     )
 
-    # Answer Relevancy e G-Eval são aplicados a todos os casos.
     metricas = [
         metrica_relevancia,
         metrica_conformidade
     ]
 
-    # Faithfulness é aplicada quando existe contexto de referência.
     if caso.get("reference_context"):
         metricas.append(metrica_fidelidade)
 
-    # Executa a avaliação.
     assert_test(
         test_case=teste,
         metrics=metricas
