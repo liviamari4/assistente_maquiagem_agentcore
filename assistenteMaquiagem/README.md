@@ -1,108 +1,270 @@
-# AgentCore Project
+# Assistente de Maquiagem — Amazon Bedrock AgentCore
 
-This project was created with the [AgentCore CLI](https://github.com/aws/agentcore-cli).
+Assistente de IA especializado em maquiagem e cosméticos, desenvolvido com **Amazon Bedrock AgentCore**.
 
-## Project Structure
+O projeto foi desenvolvido no contexto do **Desafio 2 — Avaliação e Red Teaming**, com foco na construção, avaliação e análise de segurança de um agente de IA.
 
+## Objetivo
+
+O assistente responde a consultas relacionadas aos produtos disponíveis em um catálogo de maquiagem, utilizando uma fonte autorizada para obter informações sobre:
+
+* produtos;
+* preços;
+* características;
+* tipo de pele;
+* acabamento;
+* orçamento;
+* cálculos relacionados aos produtos.
+
+O agente deve evitar a invenção de produtos, preços ou características e permanecer dentro do escopo definido para maquiagem e cosméticos.
+
+---
+
+## Arquitetura
+
+O projeto utiliza os seguintes componentes:
+
+* **Amazon Bedrock AgentCore**
+* **Amazon Nova Lite** como modelo do agente
+* **Managed Memory**
+* **Code Interpreter** para cálculos
+* **Skill `catalogo-maquiagem`**
+* **Amazon S3** como fonte do catálogo
+* **Amazon Nova Pro** como modelo avaliador do `conformidade_beauty`
+* **AWS CDK** para infraestrutura
+
+### Fluxo simplificado
+
+```text
+Usuário
+   │
+   ▼
+Assistente de Maquiagem
+   │
+   ├── System Prompt
+   │
+   ├── Managed Memory
+   │
+   ├── Skill: catalogo-maquiagem
+   │        │
+   │        └── Catálogo autorizado
+   │
+   └── Code Interpreter
+            │
+            └── Cálculos
 ```
-my-project/
-├── AGENTS.md               # AI coding assistant context
+
+---
+
+## Catálogo
+
+O assistente utiliza um catálogo com **20 produtos**.
+
+A skill `catalogo-maquiagem` define as regras para consulta da fonte autorizada e está localizada em:
+
+```text
+app/assistenteMaquiagem/catalogo-maquiagem/
+├── SKILL.md
+├── catalogo.json
+└── references/
+    └── catalogo.md
+```
+
+---
+
+## Avaliação
+
+O projeto foi avaliado utilizando três frentes complementares:
+
+### 1. AgentCore Evaluations
+
+Avaliação realizada no ambiente do AgentCore utilizando:
+
+* Correctness;
+* Faithfulness;
+* avaliador customizado `conformidade_beauty`.
+
+O avaliador customizado utiliza **Amazon Nova Pro** como LLM-as-a-Judge.
+
+Evidência:
+
+```text
+avaliacoes/01-frente_a_agentcore.md
+```
+
+### 2. DeepEval
+
+Foi utilizado um conjunto de **18 casos** para avaliar o comportamento do agente por meio de métricas como:
+
+* Answer Relevancy;
+* Faithfulness;
+* Conformidade.
+
+Evidências:
+
+```text
+dataset.json
+test_deepeval.py
+avaliacoes/02-frente_b_deepeval.md
+```
+
+### 3. Red Teaming
+
+Foram realizados **15 testes adversariais** envolvendo situações como:
+
+* prompt injection;
+* tentativa de vazamento de informações internas;
+* manipulação de valores;
+* uso indevido de contexto;
+* solicitações fora do escopo;
+* recomendações sem fonte autorizada;
+* uso inadequado de ferramentas.
+
+Evidências:
+
+```text
+red_teaming.md
+analise_correcao.md
+relatoria.md
+```
+
+---
+
+## Principais resultados
+
+### AgentCore Evaluations
+
+Foram avaliadas cinco interações comparando o comportamento baseline com a versão final.
+
+Os resultados indicaram melhora em alguns cenários, manutenção em outros e uma regressão no caso relacionado à solicitação de garantia.
+
+### DeepEval
+
+No conjunto de 18 casos:
+
+```text
+Baseline:     7/18 atingiram os thresholds
+Versão final: 8/18 atingiram os thresholds
+```
+
+Também foi identificada uma regressão em um cenário multi-turno, demonstrando que as correções não produziram melhora uniforme em todos os casos.
+
+### Red Teaming
+
+Os testes identificaram vulnerabilidades relacionadas a:
+
+* vazamento de informações internas;
+* manipulação de valores;
+* uso de contexto;
+* estimativa de preços inexistentes;
+* solicitações fora do escopo;
+* generalização de alertas;
+* recomendações sem fonte autorizada.
+
+Algumas vulnerabilidades foram corrigidas nos cenários retestados, enquanto outras permaneceram parcialmente corrigidas ou inconclusivas.
+
+---
+
+## Riscos residuais
+
+A avaliação identificou riscos que ainda precisam de tratamento antes de uma eventual utilização em produção.
+
+Entre eles:
+
+* recomendação sem fonte autorizada quando o catálogo está indisponível;
+* comportamento inconclusivo relacionado ao uso de contexto entre sessões;
+* regressão identificada em cenário multi-turno;
+* necessidade de ampliar os retestes para avaliar estabilidade do comportamento.
+
+Os detalhes estão documentados em:
+
+```text
+red_teaming.md
+analise_correcao.md
+avaliacoes/01-frente_a_agentcore.md
+avaliacoes/02-frente_b_deepeval.md
+```
+
+---
+
+## Estrutura do projeto
+
+```text
+assistente-maquiagem-agentcore/
+│
+├── README.md
+├── AGENTS.md
+├── .gitignore
+│
+├── app/
+│   └── assistenteMaquiagem/
+│       ├── harness.json
+│       ├── system-prompt.md
+│       │
+│       └── catalogo-maquiagem/
+│           ├── SKILL.md
+│           ├── catalogo.json
+│           └── references/
+│               └── catalogo.md
+│
 ├── agentcore/
-│   ├── agentcore.json      # Project config (agents, memories, credentials, gateways, evaluators)
-│   ├── aws-targets.json    # Deployment targets (account + region)
-│   ├── .env.local          # Secrets — API keys (gitignored)
-│   ├── .llm-context/       # TypeScript type definitions for AI assistants
-│   │   ├── agentcore.ts    # AgentCoreProjectSpec types
-│   │   └── aws-targets.ts  # Deployment target types
-│   └── cdk/                # CDK infrastructure (@aws/agentcore-cdk)
-├── app/                    # Agent application code
-└── evaluators/             # Custom evaluator code (if any)
+│   ├── agentcore.json
+│   └── cdk/
+│
+├── avaliacoes/
+│   ├── 01-frente_a_agentcore.md
+│   ├── 02-frente_b_deepeval.md
+│   └── comparacao.md
+│
+├── backup/
+│   ├── harness.nova-lite.json
+│   └── system-prompt.baseline.md
+│
+├── dataset.json
+├── test_deepeval.py
+├── invoke_agent.py
+├── red_teaming.md
+├── analise_correcao.md
+├── relatoria.md
+├── sessao_exploratoria.md
+└── instrucoes_conformidade.txt
 ```
 
-## Getting Started
+---
 
-### Prerequisites
+## Requisitos
 
-- **Node.js** 20.x or later
-- **Python 3.10+** and **uv** for Python agents ([install uv](https://docs.astral.sh/uv/getting-started/installation/))
-- **AWS credentials** configured (`aws configure` or environment variables)
-- **Docker** (only for Container build agents)
+Para trabalhar com o projeto, são necessários os recursos utilizados no desenvolvimento, incluindo:
 
-### Development
+* Python;
+* Node.js;
+* AWS CLI;
+* AgentCore CLI;
+* credenciais AWS com as permissões necessárias;
+* acesso aos recursos AWS utilizados pelo projeto.
 
-Run your agent locally:
+---
 
-```bash
-agentcore dev
+## Observações
+
+O projeto foi desenvolvido para fins de avaliação e estudo no contexto do desafio.
+
+Os resultados apresentados representam os cenários efetivamente testados. Retestes individuais não permitem concluir sobre a estabilidade do comportamento em múltiplas execuções.
+
+Consulte os arquivos de avaliação e Red Teaming para os resultados detalhados.
+
+---
+
+## Evidências
+
+As principais evidências do projeto estão organizadas em:
+
+```text
+avaliacoes/
+red_teaming.md
+analise_correcao.md
+relatoria.md
+dataset.json
+test_deepeval.py
+sessao_exploratoria.md
 ```
-
-### Validate Invocation Input
-
-Validate runtime invocation payloads before forwarding them to an agent framework. Keep user prompts typed as strings
-and pass only prompt text to the agent.
-
-### Deployment
-
-Deploy to AWS:
-
-```bash
-agentcore deploy
-```
-
-## Commands
-
-| Command | Description |
-| --- | --- |
-| `agentcore create` | Create a new AgentCore project |
-| `agentcore add` | Add resources (agent, memory, credential, gateway, evaluator, policy) |
-| `agentcore remove` | Remove resources |
-| `agentcore dev` | Run agent locally with hot-reload |
-| `agentcore deploy` | Deploy to AWS via CDK |
-| `agentcore status` | Show deployment status |
-| `agentcore invoke` | Invoke agent (local or deployed) |
-| `agentcore logs` | View agent logs |
-| `agentcore traces` | View agent traces |
-| `agentcore eval` | Run evaluations |
-| `agentcore package` | Package agent artifacts |
-| `agentcore validate` | Validate configuration |
-| `agentcore pause` | Pause a deployed agent |
-| `agentcore resume` | Resume a paused agent |
-| `agentcore fetch` | Fetch remote resource definitions |
-| `agentcore import` | Import existing resources |
-| `agentcore update` | Check for CLI updates |
-
-## Configuration
-
-Edit the JSON files in `agentcore/` to configure your project. See `agentcore/.llm-context/` for type definitions and validation constraints.
-
-The project uses a **flat resource model** — agents, memories, credentials, gateways, evaluators, and policies are top-level arrays in `agentcore.json`. Resources are independent; agents discover memories and credentials at runtime via environment variables or SDK calls.
-
-## Resources
-
-| Resource | Purpose |
-| --- | --- |
-| Agent (runtime) | HTTP, MCP, or A2A agent deployed to AgentCore Runtime |
-| Memory | Persistent context storage with configurable strategies |
-| Credential | API key or OAuth credential providers |
-| Gateway | MCP gateway that routes tool calls to targets |
-| Gateway Target | Tool implementation (Lambda, MCP server, OpenAPI, Smithy, API Gateway) |
-| Evaluator | Custom LLM-as-a-Judge or code-based evaluation |
-| Online Eval Config | Continuous evaluation pipeline for deployed agents |
-| Policy | Cedar authorization policies for gateway tools |
-
-### Agent Types
-
-- **Template agents**: Created from framework templates (Strands, LangChain/LangGraph, GoogleADK, OpenAI Agents, Autogen)
-- **BYO agents**: Bring your own code with `agentcore add agent --type byo`
-- **Import agents**: Import existing Bedrock agents with `agentcore import`
-
-### Build Types
-
-- **CodeZip**: Python source packaged as a zip and deployed directly to AgentCore Runtime
-- **Container**: Docker image built via CodeBuild (ARM64), pushed to ECR, and deployed to AgentCore Runtime
-
-## Documentation
-
-- [AgentCore CLI](https://github.com/aws/agentcore-cli)
-- [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)
-- [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/)
