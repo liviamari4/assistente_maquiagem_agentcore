@@ -1,4 +1,3 @@
-```md
 # Relatório Final — Desafio 2: Avaliação e Red Teaming
 
 ## 1. Planejamento
@@ -198,4 +197,3 @@ Antes da implantação, seriam necessárias novas correções e novas rodadas de
 ## Evidências principais
 
 `app/assistenteMaquiagem/harness.json` · `app/assistenteMaquiagem/system-prompt.md` · `app/assistenteMaquiagem/catalogo-maquiagem/SKILL.md` · `app/assistenteMaquiagem/catalogo-maquiagem/references/catalogo.md` · `app/assistenteMaquiagem/catalogo-maquiagem/catalogo.json` · `dataset.json` · `test_deepeval.py` · `sessão_exploratória.md` · `avaliacoes/01-frente_a_agentcore.md` · `avaliacoes/02-frente_b_deepeval.md` · `avaliacoes/comparacao.md` · `red_teaming.md` · `analise_correcao.md` · `relatoria.md`
-```
