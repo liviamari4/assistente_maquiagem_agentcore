@@ -16,19 +16,16 @@ with open("dataset.json", encoding="utf-8") as arquivo:
     casos = json.load(arquivo)
 
 
-# Métrica 1 — Answer Relevancy
 metrica_relevancia = AnswerRelevancyMetric(
     threshold=0.7
 )
 
 
-# Métrica 2 — Faithfulness
 metrica_fidelidade = FaithfulnessMetric(
     threshold=0.8
 )
 
 
-# Métrica 3 — G-Eval de conformidade
 metrica_conformidade = GEval(
     name="Conformidade",
     criteria="""
@@ -90,7 +87,6 @@ metrica_conformidade = GEval(
 )
 def test_caso(caso):
 
-    # Casos multi-turno: mantém a mesma sessão nas duas mensagens.
     if isinstance(caso["input"], list):
 
         session_id = str(uuid.uuid4())
@@ -103,8 +99,6 @@ def test_caso(caso):
             )
             respostas.append(resposta)
 
-        # Avalia a resposta da última mensagem,
-        # considerando que ela ocorreu após a conversa anterior.
         pergunta = caso["input"][-1]
         resposta = respostas[-1]
 
@@ -112,7 +106,6 @@ def test_caso(caso):
 
         pergunta = caso["input"]
 
-        # Envia a pergunta para o agente real do AgentCore.
         resposta = perguntar_agentcore(pergunta)
 
     teste = LLMTestCase(
